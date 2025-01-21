@@ -1,0 +1,152 @@
+---
+title: "Regressão Logística"
+author: "Maitê Mückler"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Importar bibliotecas
+```{r, message=FALSE, warning=FALSE}
+library(combinat)
+library(dplyr)
+library(data.table)
+library(tidyr)
+library(corrplot)
+library(ggplot2)
+library(cowplot)
+```
+
+# Importar dataset
+```{r, message=FALSE, warning=FALSE}
+wd_data    <- "~/Work/Research/Astronomy/Data/InputModel/"
+input_file <- "inputdata_zmax0.1_Rlim2.5_Ma12.3_flag_good==1_MANGLE_logMstar_min10.5.csv"
+df         <- fread(paste0(wd_data, input_file))
+df         <- subset(df, df$type == "Satellite") # Selecionando apenas satélites
+df         <- df %>% rename(SF = SF_GSWLC) # Modificando o nome da variável resposta
+
+dim(df) # Dimensão do dataset
+# head(df) # Preview do dataset
+
+# Definindo as duas variáveis categóricas como factor()
+df$SF  <- factor(df$SF)
+df$AGN <- factor(df$AGN)
+```
+
+# Criando dataset para AGN e para não-AGN
+```{r, message=FALSE, warning=FALSE}
+df_AGN  <- subset(df, df$AGN == "AGN")
+df_nAGN <- subset(df, df$AGN == "Non-AGN")
+rm(df) # Removendo df
+```
+
+# Selecionando variáveis
+```{r, message=FALSE, warning=FALSE}
+# Variáveis intrínsecas + SF
+var_int <- c("SF",
+             "vlos_vvir",
+             "e",
+             "Mstar_Mhalo",
+             "logvelDisp_e",
+             "logMstar",
+             "B_T_r",
+             "conc",
+             "d4000_n",
+             "TType",
+             "P_disk",                 
+             "P_edge_on",              
+             "P_bar_GZ2",              
+             "P_bar_Nair10",           
+             "P_merg",                 
+             "P_bulge",               
+             "P_cigar",                
+             "TType",                  
+             "P_S0")
+
+# Variáveis ambientais + SF
+var_ext <- c("SF",
+             "logMgroup",
+             "logRproj_rvir",
+             "logdens_n_Rproj0.5",
+             "logdens_n_Rproj1",
+             "logdens_proj_Neq1",
+             "logdens_proj_Neq3",
+             "logdens_proj_Neq5")
+
+variaveis <- c(var_int, var_ext)
+
+df_AGN  <- df_AGN %>% select(all_of(variaveis))
+df_nAGN <- df_nAGN %>% select(all_of(variaveis))
+
+```
+
+# Criando data.frames do tipo long
+```{r, message=FALSE, warning=FALSE}
+df_long_AGN  <- pivot_longer(df_AGN, cols = vlos_vvir:logdens_proj_Neq5, names_to = "Variable", values_to = "Value")
+df_long_nAGN <- pivot_longer(df_nAGN, cols = vlos_vvir:logdens_proj_Neq5, names_to = "Variable", values_to = "Value")
+```
+
+# Descritivas
+
+## Correlação entre a resposta e as covariáveis
+```{r, message=FALSE, warning=FALSE, dpi = 200}
+
+df_AGN_corr <- df_AGN %>% select(-SF) 
+df_AGN_corr <- cor(df_AGN_corr)
+
+df_nAGN_corr <- df_nAGN %>% select(-SF) 
+df_nAGN_corr <- cor(df_nAGN_corr)
+
+par(mfrow = c(1, 2))
+
+corrplot(df_AGN_corr, type = 'lower', diag = F, tl.col = "black", bg = "White", tl.cex=0.5, mar = c(0, 0, 1, 0), title = "Correlação para AGN")
+corrplot(df_nAGN_corr, type = 'lower', diag = F, tl.col = "black", bg = "White", tl.cex=0.5, mar = c(0, 0, 1, 0), title = "Correlação para não-AGN")
+
+par(mfrow = c(1, 1))
+```
+
+## Densidades AGN
+```{r, message=FALSE, warning=FALSE, dpi = 200}
+
+p1 <- df_long_AGN %>%
+  filter(Variable %in% var_int) %>%
+ggplot(aes(x = Value, fill = SF)) + 
+  geom_density(alpha = 0.3) + 
+  facet_wrap(.~Variable, scales = "free") +
+  theme(legend.position = "bottom")
+
+p2 <- df_long_AGN %>%
+  filter(Variable %in% var_ext) %>%
+ggplot(aes(x = Value, fill = SF)) + 
+  geom_density(alpha = 0.3) + 
+  facet_wrap(.~Variable, scales = "free") +
+  theme(legend.position = "bottom")
+
+plot_grid(p1, p2, ncol = 2)
+```
+
+## Densidades não-AGN
+```{r, message=FALSE, warning=FALSE, dpi = 200}
+
+p1 <- df_long_nAGN %>%
+  filter(Variable %in% var_int) %>%
+ggplot(aes(x = Value, fill = SF)) + 
+  geom_density(alpha = 0.3) + 
+  facet_wrap(.~Variable, scales = "free") +
+  theme(legend.position = "bottom")
+
+p2 <- df_long_nAGN %>%
+  filter(Variable %in% var_ext) %>%
+ggplot(aes(x = Value, fill = SF)) + 
+  geom_density(alpha = 0.3) + 
+  facet_wrap(.~Variable, scales = "free") +
+  theme(legend.position = "bottom")
+
+plot_grid(p1, p2, ncol = 2)
+```
