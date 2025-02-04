@@ -1,14 +1,4 @@
-### Definir diretórios ----
-wdmain       <- "~/Work/Research/Astronomy/"
-wdproject    <- paste0(wdmain, "Projects/environmental-quenching/")
-wdcode       <- paste0(wdproject, "Scripts/")
-wddata       <- paste0(wdmain, "Data/")
-wdassigndata <- paste0(wdproject, "Data/Assignment2groups/")
-wdinputdata  <- paste0(wdproject, "Data/InputModel/")
-wdoutputdata <- paste0(wdproject, "Data/OutputModel/")
-wdfigs       <- paste0(wdproject, "Figures/")
-
-source("~/Work/Research/Astronomy/Projects/environmental-quenching/Scripts/Themes/ggplot_theme_Publication-2.R")
+source(paste0(wdcode, "Themes/ggplot_theme_Publication-2.R"))
 
 my_theme <- theme(panel.grid.major = element_line(colour = "grey90"),
                   panel.grid.minor = element_line(colour = "grey90"),

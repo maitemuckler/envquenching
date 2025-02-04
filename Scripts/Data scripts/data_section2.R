@@ -3,35 +3,32 @@ library(data.table)
 library(dplyr)
 
 ## Diretórios ----
-wdcode <- "~/Work/Research/Astronomy/Projects/environmental-quenching/Scripts/"
-wddata <- "~/Work/Research/Astronomy/Data/environmental-quenching-data/"
-wdfigs <- "~/Work/Research/Astronomy/Projects/environmental-quenching/Figures/"
+wdcode <- "Scripts/"
+wddata <- "/home/muckler/Work/Research/Astronomy/Data/"
+wdfigs <- "Figures/"
 
 ## Definir qual tabela assignment ----
-zmax    <- 0.07
+zmax    <- 0.1
 Rlim    <- 2.5
-Ma      <- 14
+Ma      <- 12.3
 
 ## Definindo input e output files ----
-input_clean_file  <- "clean_SDSS_DR18_Legacy_MGS_QSO_localDensity+GSWLC+Simard11+DS18.csv" 
+input_clean_file  <- "clean_letter1_sample.csv"
 input_assing_file <- paste0("assignment2groups_zmax",zmax,"_Rlim",Rlim,"_Ma",Ma,".csv")
-
 output_file <- paste0("assign_zmax", zmax, "_Ma", Ma, "_", input_clean_file)
 
 ## Lendo os dados ----
-df_clean  <- fread(paste0(wddata, input_clean_file)) # 255.688 (328.020 - 255.688 = 72.332 excluídas)
+df_clean  <- fread(paste0(wddata, input_clean_file)) # 255.727 (328020 - 255727 = 72293 excluídas)
 df_assign <- fread(paste0(wddata, "Assignment2groups/", input_assing_file))
 
-# Para zmax = 0.1 e Ma = 12.3:   297.555 (320.020 - 297.55 = 30.465 galáxias que não estão em grupos)
+# df_assign para zmax = 0.03 e Ma = 12.3: 26.937
+# df_assign para zmax = 0.10 e Ma = 12.3: 
 
 ## Unir tabela clean e assignment ----
 df <- merge(df_assign, df_clean, by = 'igal') 
 
-# Para zmax = 0.1 e Ma = 12.3: 232.268
-
-#  A alegação é:
-# "Das 255.688 galáxias da nossa amostra, 23.420 não foram atribuidas a nenhum grupo."
-#  Questão: São galáxias isoladas ou apenas galáxias que não estão em nenhum grupo do Lim?
+# df merged para zmax = 0.03 e Ma = 12.3: 14.718
+# df merged para zmax = 0.10 e Ma = 12.3: 
 
 ## Remover essas colunas repetidas no merge ----
 colunas_para_remover <- grep("\\.y$", names(df), value = TRUE)
@@ -57,55 +54,6 @@ df$logRproj_rvir <- log10(df$Rproj_rvir) # log(Rproj_rvir)
 df$type <- ifelse(df$Rproj_rvir > 0, "Satellite", "Central")
 df$type <- as.factor(df$type)
 
-# log10(Mstar/Mhalo): 
-df$Mstar_Mhalo <- df$logMstar - df$logMgroup
-
-## Criar colunas para variáveis a respeito das centrais ----
-
-df$groupID <- as.factor(df$groupID)
-
-# Colunas que quero salvar a informação da central 
-colsCentral <- c("groupID", 
-                 "logMstar", 
-                 "logSFR_SED", 
-                 "logvelDisp_e", 
-                 "vlos_vvir", 
-                 "conc", 
-                 "d4000_n",
-                 "logSigma_SFR", 
-                 "distLine_GSWLC", 
-                 "SF_GSWLC", 
-                 "AGN",
-                 "P_disk", 
-                 "P_edge_on", 
-                 "P_bar_GZ2", 
-                 "P_bar_Nair10", 
-                 "P_merg", 
-                 "P_bulge", 
-                 "B_T_r", 
-                 "e", 
-                 "P_cigar", 
-                 "TType", 
-                 "P_S0", 
-                 "TType_label")
-
-colsCentral_names <- colsCentral
-colsCentral_names[-1] <- paste0(colsCentral[-1], "_central")
-
-aux <- df %>%
-  filter(type == "Central") %>%
-  select(all_of(colsCentral))
-
-colnames(aux) <- colsCentral_names
-
-df <- merge(df, aux, by = "groupID", all.x = T)
-
-rowIndex <- which(colnames(df) %in% colsCentral_names)
-rowIndex <- rowIndex[-1]
-nrow(df[rowSums(is.na(df[,..rowIndex])) == ncol(df[,..rowIndex]), ..rowIndex]) # Sem informação de central
-
-rm(aux, df_assign, df_clean)
-
 ## Converter variáveis para classes corretas ----
 
 lapply(df, class) # Verificar o tipo das variáveis
@@ -121,11 +69,7 @@ colunas_para_converter <- c("Class",
                             "SF_GSWLC",
                             "SF_MPAJHU",
                             "TType_label",
-                            "AGN",
-                            "groupID", 
-                            "SF_GSWLC_central", 
-                            "AGN_central",
-                            "TType_label_central")
+                            "groupID")
 df <- df %>%
   mutate(across(all_of(colunas_para_converter), factor))
 
@@ -198,12 +142,7 @@ names(df)[sapply(df, function(x) any(is.na(x)))]
 names(df)[sapply(df, function(x) any(is.infinite(x)))]
 
 # logRproj_rvir        <- infinito porque era central, então Rproj = 0 -> logRproj = Inf.
-# logO3Hb e logN2Ha    <- alguma divisão por zero.
-# logvelDisp_e_central <- a central deve ter velDisp_e = 0 -> logvelDisp_e = Inf.
-# Para logvelDisp_e_central vou susbtituir o Inf por NA.
-
-# Central
-df$logvelDisp_e_central[which(is.infinite(df$logvelDisp_e_central))] <- NA
 
 ## Salvar tabela ----
-write.csv(df, paste0(wddata, "assign/", output_file), row.names = F)
+write.csv(df, paste0(wddata, "Assignment2groups/", output_file), row.names = F)
+
