@@ -1,4 +1,4 @@
-source(paste0(wdcode, "Themes/ggplot_theme_Publication-2.R"))
+source("~/Work/Research/Astronomy/Projects/envquenching/Scripts/Themes/ggplot_theme_Publication-2.R")
 
 my_theme <- theme(panel.grid.major = element_line(colour = "grey90"),
                   panel.grid.minor = element_line(colour = "grey90"),

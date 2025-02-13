@@ -1,4 +1,4 @@
-setwd("~/Work/Research/Astronomy/Projects/environmental-quenching/")
+setwd("~/Work/Research/Astronomy/Projects/envquenching/")
 
 library(data.table)
 library(binom)
@@ -12,7 +12,7 @@ library(ggthemes) # theme_clean
 
 source("Scripts/Themes/my_theme.R")
 
-wddata <- "~/Work/Research/Astronomy/Data/environmental-quenching-data/"
+wddata <- "~/Work/Research/Astronomy/Data/"
 
 zmax          <- 0.1
 catalog       <- "GSWLC"

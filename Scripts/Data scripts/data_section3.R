@@ -2,14 +2,14 @@
 library(data.table)
 
 ## Diretórios ----
-wdcode <- "~/Work/Research/Astronomy/Projects/environmental-quenching/Scripts/"
-wddata <- "~/Work/Research/Astronomy/Data/environmental-quenching-data/"
-wdfigs <- "~/Work/Research/Astronomy/Projects/environmental-quenching/Figures/"
+wdcode <- "Scripts/"
+wddata <- "/home/muckler/Work/Research/Astronomy/Data/"
+wdfigs <- "Figures/"
 
 ## Definir qual tabela assignment ----
-zmax    <- 0.07
+zmax    <- 0.1
 Rlim    <- 2.5
-Ma      <- 14
+Ma      <- 12.3
 catalog <- "GSWLC"
 
 ## Definindo input e output files ----
@@ -18,7 +18,8 @@ output_file         <- paste0("inputdata_zmax", zmax, "_Rlim", Rlim, "_Ma", Ma, 
 output_file_cutMass <- paste0("inputdata_zmax", zmax, "_Rlim", Rlim, "_Ma", Ma, "_flag_good==1_MANGLE_logMstar_min10.5.csv")
   
 ## Lendo os dados ----
-df  <- fread(paste0(wddata, "assign/", input_file)) 
+#df  <- fread(paste0(wddata, "Assignment2groups", input_file)) 
+df  <- fread(paste0(wddata, "Assignment2groups", "/assign_zmax0.1_Ma12.3_clean_letter1_sample.csv")) 
 
 ## Corrigindo MANGLE ----
 mangle_L  <- fread("~/Work/Research/Astronomy/Data/Mangle/groups_fmangle_L.csv")
