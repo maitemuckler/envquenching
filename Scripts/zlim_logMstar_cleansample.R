@@ -27,7 +27,7 @@ compute = T
 # ------------------------
 # INPUT FILE
 # ------------------------
-input_file <- paste0(datawd, 'clean.csv')
+input_file <- paste0(wddata, 'letter1_sample.csv')
 
 # ------------------------
 # z BINS
@@ -69,12 +69,12 @@ for(input_sample in input_samples){
                       input_sample, temp, '.pdf', sep = '')
   
   # TABLES
-  ifelse(!dir.exists(paste0(datawd, "zlim_logMstar")), 
-         dir.create(paste0(datawd, "zlim_logMstar")), FALSE)
+  ifelse(!dir.exists(paste0(wddata, "zlim_logMstar")), 
+         dir.create(paste0(wddata, "zlim_logMstar")), FALSE)
   
-  output_file1 = paste(datawd, 'zlim_logMstar/logM_zlim_', 
+  output_file1 = paste(wddata, 'zlim_logMstar/logM_zlim_', 
                        input_sample, temp, '.csv', sep = '')
-  output_file2 = paste(datawd, 'zlim_logMstar/logM_zlim_', 
+  output_file2 = paste(wddata, 'zlim_logMstar/logM_zlim_', 
                        input_sample, temp, '_coeffs.csv', sep = '')
   
   if(input_sample == 'S_BC03'){M_s = data$logMstar_BC03}
@@ -363,5 +363,3 @@ for(input_sample in input_samples){
          lty = c(1, 2), col = c('blue', 'red'), lwd = c(2, 2), bty = 'n', cex = 1.2)
   dev.off()
 }
-
-
